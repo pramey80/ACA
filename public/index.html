@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hackathon Team Registration</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="wrap">
+  <nav><b>Hackathon Registration</b><a href="/judges.html">Judges panel &rarr;</a></nav>
+
+  <div id="formCard" class="card">
+    <h1>Register your team</h1>
+    <p class="sub">You'll get your seating table number instantly.</p>
+    <form id="f">
+      <label>Team name<input name="teamName" required maxlength="80" autocomplete="off"></label>
+      <div class="row">
+        <label>Member 1 name<input name="member1Name" required maxlength="80"></label>
+        <label>Member 1 email ID<input name="email1" type="email" required></label>
+      </div>
+      <div class="row">
+        <label>Member 2 name<input name="member2Name" required maxlength="80"></label>
+        <label>Member 2 email ID<input name="email2" type="email" required></label>
+      </div>
+      <label>Area of project
+        <select name="area" required>
+          <option value="">Select an area</option>
+          <option>AI / Machine Learning</option>
+          <option>Web Development</option>
+          <option>Mobile Apps</option>
+          <option>IoT / Hardware</option>
+          <option>Blockchain / Web3</option>
+          <option>Healthcare</option>
+          <option>Education</option>
+          <option>FinTech</option>
+          <option>Sustainability / Climate</option>
+          <option>Cybersecurity</option>
+          <option>Other</option>
+        </select>
+      </label>
+      <div id="err" class="msg err hidden"></div>
+      <button id="btn" type="submit">Register &amp; get my table</button>
+    </form>
+  </div>
+
+  <div id="resultCard" class="card result hidden">
+    <span class="pill">Registered</span>
+    <h1 id="rName"></h1>
+    <div class="meta">Your table number</div>
+    <div class="tbl" id="rTable"></div>
+    <p class="meta">Judging panel: <b id="rPanel"></b></p>
+    <p class="meta">Please take a screenshot and go to your table.</p>
+    <button class="ghost" onclick="location.reload()">Register another team</button>
+  </div>
+</div>
+
+<script>
+const f = document.getElementById('f'), err = document.getElementById('err'), btn = document.getElementById('btn');
+f.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  err.classList.add('hidden');
+  btn.disabled = true; btn.textContent = 'Registering...';
+  try {
+    const body = Object.fromEntries(new FormData(f).entries());
+    const r = await fetch('/api/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || 'Something went wrong');
+    document.getElementById('rName').textContent = j.team.teamName;
+    document.getElementById('rTable').textContent = j.team.table;
+    document.getElementById('rPanel').textContent = 'Panel ' + j.team.panel;
+    document.getElementById('formCard').classList.add('hidden');
+    document.getElementById('resultCard').classList.remove('hidden');
+  } catch (ex) {
+    err.textContent = ex.message; err.classList.remove('hidden');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Register & get my table';
+  }
+});
+</script>
+</body>
+</html>
